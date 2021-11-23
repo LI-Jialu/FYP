@@ -49,9 +49,6 @@ interval = 5 #10, 20
 starttime_interval = datetime.datetime.now()
 svm_i = svm_interval(df, interval)
 f1, f2, f3, f4, f5, f6, f7 = svm_i.interval_feature()
-
-
-
 endtime_interval = datetime.datetime.now()
 print('The SVM using sliding window running time:')
 print((endtime_interval - starttime_interval).seconds)
