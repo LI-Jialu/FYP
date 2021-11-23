@@ -34,8 +34,8 @@ print('The SVM using sliding window running time:')
 print((endtime_point - starttime_point).seconds)
 
 
-##-------------------------------------------SVM Interval--------------------------------------------## 
-interval = 5 #10, 20 
+##----------------------------------------SVM Interval (3 labels)---------------------------------------## 
+interval = 5 #10, 20
 # drop the content outside intervals e.g. 26%5=1, 26->25 
 starttime_interval = datetime.datetime.now()
 svm_interval()
@@ -44,6 +44,7 @@ endtime_interval = datetime.datetime.now()
 print('The SVM using sliding window running time:')
 print((endtime_interval - starttime_interval).seconds)
 
+##----------------------------------------SVM Interval (5 labels)--------------------------------------## 
 ##-------------------------------------------SVM Interval with PCA-------------------------------------## 
 
 ##-----------------------------------SVM Interval with PCA with condiction ----------------------------## 
@@ -117,10 +118,12 @@ figure.savefig(f'backtrader.png')
 
 
 ##-----------------------------------------------analysis------------------------------------------## 
-# E.g. plot accuracy plot comparison etc. 
+# testing different time interval selection 
+# testing different PCA dimension 
+# plot accuracy plot comparison 
+# plot the prediction on the stock graph 
 
 ##-------------------------------------------------End---------------------------------------------## 
-
 endtime_0 = datetime.datetime.now()
 print((endtime_0 - starttime_0).seconds)
 print('The whole running time:')
