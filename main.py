@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from data_download import download
-from  data_preprocessing import load_data
+from download_order_book import download_order_book as dob
+import download_price as dp 
 from svm import svm_timepoint, svm_interval, train_test
 from trading import TestStrategy, CommisionScheme
 # import pca 
@@ -15,20 +15,30 @@ import analysis as analysis
 import pyfolio as pf
 
 
+
 starttime_0 = datetime.datetime.now()
 ##-------------------------------------------Data collection-----------------------------------------## 
-download() 
+dob.download() 
+raw_data_path = './raw_data' # folder to store raw data
+tickers_list = ['BTC','ETH']
+tf = '1m' # 1 minute 
+DP = dp.get_data(tickers_list, tf, raw_data_path)
+DP.get_raw()
+DP.get_file('close')
+DP.get_file('volume')
+DP.combine_csv()
 
 ##---------------------------------Data loading & preprocessing--------------------------------------## 
 # pd.set_option('display.max_columns', None)
 path = 'C:/tardis_dataset/bitmex'
 date = '2021-10-02'
-df = load_data(path, date)
+df = dob.load_data(path, date)
 
-##-------------------------------------------SVM Time point-------------------------------------------##
+##----------------------------------------SVM Single timepoint-------------------------------------------##
 starttime_point = datetime.datetime.now()
-svm_timepoint()
-train_test() 
+svm_s = svm_timepoint(df)
+f1, f2, f3, f4, f5, f6 = svm_s.timpoint_feature()
+
 endtime_point = datetime.datetime.now()
 print('The SVM using sliding window running time:')
 print((endtime_point - starttime_point).seconds)
@@ -36,10 +46,12 @@ print((endtime_point - starttime_point).seconds)
 
 ##----------------------------------------SVM Interval (3 labels)---------------------------------------## 
 interval = 5 #10, 20
-# drop the content outside intervals e.g. 26%5=1, 26->25 
 starttime_interval = datetime.datetime.now()
-svm_interval()
-train_test()
+svm_i = svm_interval(df, interval)
+f1, f2, f3, f4, f5, f6, f7 = svm_i.interval_feature()
+
+
+
 endtime_interval = datetime.datetime.now()
 print('The SVM using sliding window running time:')
 print((endtime_interval - starttime_interval).seconds)
@@ -122,6 +134,7 @@ figure.savefig(f'backtrader.png')
 # testing different PCA dimension 
 # plot accuracy plot comparison 
 # plot the prediction on the stock graph 
+# Can this model also work for ETH? 
 
 ##-------------------------------------------------End---------------------------------------------## 
 endtime_0 = datetime.datetime.now()

@@ -3,78 +3,70 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 import pickle
-import split 
+from interval_split import split, normalize
+from interval_split import interval_mean as imean 
+from interval_split import interval_var as ivar 
 
-def normalize(X):
-    m,n = X.shape
-    for j in range(n):
-        features = X[:, j]
-        mean = features.mean(0)
-        std = features.std(0)
-        if(std != 0):
-            X[:, j] = (features - mean) / std
-        else:
-            X[:, j] = 0
-    return X
 
 class svm_interval: 
-    def __init__(self):
-        pass
+    def __init__(self, df, interval):
+        self.df = df 
+        self.interval = interval 
 
-    def interval_feature(self, df, interval): 
-        timestamps = np.array(df['timestamp'])
+    def interval_feature(self): 
+        timestamps = np.array(self.df['timestamp'])
         N = timestamps.shape[0]
 
-        # Feature Set V1
-        f1 = df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
+        # Feature Set V1   
+        f1_temp = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
                 'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 'Va6', 'Va7', 'Va8', 'Va9', 'Va10',
                 'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 'Pb6', 'Pb7', 'Pb8', 'Pb9', 'Pb10',
                 'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5', 'Vb6', 'Vb7', 'Vb8', 'Vb9', 'Vb10',]]
-        f1 =split(np.array(f1),interval)
+        f1_temp = np.array(f1_temp)
+        f1 =split(f1_temp,self.interval)
 
-
-        # Feature Set V2
-        temp1 = f1[:, 0:10] - f1[:, 20:30]
-        temp2 = (f1[:, 0:10] + f1[:, 20:30]) * 0.5
-        f2 = split(np.concatenate((temp1, temp2), axis = 1),interval)
-
+        # Feature Set V2: price difference and mid-price 
+        temp1 = f1_temp[:, 0:10] - f1_temp[:, 20:30]
+        temp2 = (f1_temp[:, 0:10] + f1_temp[:, 20:30]) * 0.5
+        f2_temp = np.concatenate((temp1, temp2), axis = 1)
+        f2 = split(f2_temp,self.interval)
 
         # Feature Set V3
-        temp1 = (f1[:, 9] - f1[:, 0]).reshape(N, 1)
-        temp2 = (f1[:, 20] - f1[:, 29]).reshape(N, 1)
-        temp3 = abs(f1[:, 1:10] - f1[:, 0:9])
-        temp4 = abs(f1[:, 21:30] - f1[:, 20:29])
-        f3 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),interval)
+        temp1 = (f1_temp[:, 9] - f1_temp[:, 0]).reshape(N, 1)
+        temp2 = (f1_temp[:, 20] - f1_temp[:, 29]).reshape(N, 1)
+        temp3 = abs(f1_temp[:, 1:10] - f1_temp[:, 0:9])
+        temp4 = abs(f1_temp[:, 21:30] - f1_temp[:, 20:29])
+        f3 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
 
         # Feature Set V4: mean prices and volumes
-        temp1 = np.mean(f1[:, :10], axis = 1).reshape(N, 1)
-        temp2 = np.mean(f1[:, 20:30], axis = 1).reshape(N, 1)
-        temp3 = np.mean(f1[:, 10:20], axis = 1).reshape(N, 1)
-        temp4 = np.mean(f1[:, 30:], axis = 1).reshape(N, 1)
-        f4 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),interval)
+        temp1 = np.mean(f1_temp[:, :10], axis = 1).reshape(N, 1)
+        temp2 = np.mean(f1_temp[:, 20:30], axis = 1).reshape(N, 1)
+        temp3 = np.mean(f1_temp[:, 10:20], axis = 1).reshape(N, 1)
+        temp4 = np.mean(f1_temp[:, 30:], axis = 1).reshape(N, 1)
+        f4 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
 
         # Feature Set V5: accumulated differences
-        temp1 = np.sum(f2[:, 0:10], axis = 1).reshape(N, 1)
-        temp2 = np.sum(f1[:, 10:20] - f1[:, 30:40], axis = 1).reshape(N, 1)
-        f5 = split(np.concatenate((temp1, temp2), axis = 1),interval)
+        temp1 = np.sum(f2_temp[:, 0:10], axis = 1).reshape(N, 1)
+        temp2 = np.sum(f1_temp[:, 10:20] - f1_temp[:, 30:40], axis = 1).reshape(N, 1)
+        f5 = split(np.concatenate((temp1, temp2), axis = 1),self.interval)
 
         # Feature Set V6: Time interval for numbers of orders 
-        f6 =split(np.array(df[['timestamp']]),interval)
+        f6_temp =split(np.array(self.df[['timestamp']]),self.interval)
+        f6 = np.array([f[-1]-f[0] for f in f6_temp])
 
-        # Feature Set V7: Mean and variance 
-
-        ## Price difference of b1, a1, b2, a2, 
-        return f1, f2, f3, f4, f5, f6 
-
+        # Feature Set V7: Mean and variance of bids and asks 
+        mean = imean(f1_temp, self.interval)
+        var = ivar(f1_temp, self.interval)
+        f7 = np.concatenate((mean, var), axis = 1)
     
+        return f1, f2, f3, f4, f5, f6, f7
 
-    def _X(self, f1, f2, f3, f4, f5,f6, N): 
+
+    def _X(self, f1, f2, f3, f4, f5, f6, f7): 
     # Concatenate all features and normalize
-        X = np.concatenate((f1, f2, f3, f4, f5), axis = 1)
-        X = np.delete(X, 0, axis = 0)
-        X = np.concatenate((X, f6), axis = 1)
-        X = np.delete(X, N-2, axis = 0)
+        X = np.concatenate((f1, f2, f3, f4, f5, f6, f7), axis = 1)
         X = normalize(X)
+        return X
 
     def _y(self, f2, N): 
         N = N - 2
@@ -83,19 +75,18 @@ class svm_interval:
         threshold = 0.1
         for i in range(N):
             y[i] = 0 if (abs(f2[i+2, 10] - f2[i+1, 10]) < threshold) else (1 if (f2[i+2, 10] > f2[i+1, 10]) else -1)
-
+        return y 
 
 class svm_timepoint: 
-    def __init__(self):
-        pass
-
-    def timpoint_feature(self, df):
-
-        timestamps = np.array(df['timestamp'])
+    def __init__(self, df):
+        self.df = df 
+        
+    def timpoint_feature(self):
+        timestamps = np.array(self.df['timestamp'])
         N = timestamps.shape[0]
 
         # Feature Set V1
-        f1 = df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
+        f1 = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
                 'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 'Va6', 'Va7', 'Va8', 'Va9', 'Va10',
                 'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 'Pb6', 'Pb7', 'Pb8', 'Pb9', 'Pb10',
                 'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5', 'Vb6', 'Vb7', 'Vb8', 'Vb9', 'Vb10',]]

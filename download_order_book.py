@@ -1,9 +1,10 @@
 import os 
 from tardis_dev import datasets, get_exchange_details
 import logging
+import pandas as pd
 
 
-class data_collection: 
+class download_order_book: 
     def __init__(self):
         pass
 
@@ -16,10 +17,8 @@ class data_collection:
     def file_name_nested(exchange, data_type, date, symbol, format):
         return f"{exchange}/{data_type}/{date.strftime('%Y-%m-%d')}_{symbol}.{format}.gz"
 
-    def download(self): 
+    def download_order_book(self): 
         # os.chdir('.\Data')
-        # needed data: 
-        # snapshot_25, derivative_ticker 
         logging.basicConfig(level=logging.DEBUG)
         datasets.download(
             # one of https://api.tardis.dev/v1/exchanges with supportsDatasets:true - use 'id' value
@@ -28,7 +27,6 @@ class data_collection:
             # or get those values from 'deribit_details["datasets"]["symbols][]["dataTypes"] dict above
             # data_types=["incremental_book_L2", "trades", "quotes", "derivative_ticker", "book_snapshot_25", "liquidations"],
             data_types=[ "book_snapshot_5"],
-            # change date ranges as needed to fetch full month or year for example
             from_date="2021-09-23",
             # to date is non inclusive
             to_date="2021-10-07",
@@ -43,3 +41,15 @@ class data_collection:
             # (optional) file_name_nested will download data to nested directory structure (split by exchange and data type)
             # get_filename=file_name_nested,
         )
+
+    def load_data(path, date):
+        df = pd.read_csv(path + '/book_snapshot_25/XBTUSD/bitmex_book_snapshot_25_' + date + '_XBTUSD.csv.gz',
+                        header = 0,
+                        names = ['timestamp', 'Pa1', 'Va1', 'Pb1', 'Vb1', 'Pa2', 'Va2', 'Pb2', 'Vb2', 
+                                'Pa3', 'Va3', 'Pb3', 'Vb3', 'Pa4', 'Va4', 'Pb4', 'Vb4', 
+                                'Pa5', 'Va5', 'Pb5', 'Vb5', 'Pa6', 'Va6', 'Pb6', 'Vb6', 
+                                'Pa7', 'Va7', 'Pb7', 'Vb7', 'Pa8', 'Va8', 'Pb8', 'Vb8', 
+                                'Pa9', 'Va9', 'Pb9', 'Vb9', 'Pa10', 'Va10', 'Pb10', 'Vb10'],
+                        usecols = [2] + list(range(4, 44)),
+                        compression = 'gzip')
+        return df

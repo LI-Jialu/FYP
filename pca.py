@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
 class pca: 
-    def train(self,df): 
+    def _pca(self,df): 
         # Separating out the features
         features = []
         x = df.loc[:, features].values
