@@ -46,6 +46,22 @@ class download_order_book:
             
         )
 
+    '''def download_derivative_ticker(self): 
+        os.chdir('.\Data')
+        logging.basicConfig(level=logging.DEBUG)
+        datasets.download(
+            exchange="binance-futures",
+            # Allowed 'dataType' param values: 
+            # 'trades', 'incremental_book_L2', 'quotes', 'derivative_ticker', 'options_chain', 'book_snapshot_5', 'book_snapshot_25', 'liquidations'.
+            data_types=['derivative_ticker'],
+            from_date="2021-10-02",
+            # to date is non inclusive
+            to_date="2021-10-03",
+            symbols=["BTCUSDT"],
+            api_key="TD.qtKSUEXoqaY7HYJC.WbIkzzx6IlUzmfW.HpGRMPQvrzWmja0.ufinV2kPJLc8WTl.1Nzl5-0NRFZkP7m.3BdA",
+            download_dir="./Derivative_ticker",            
+        )'''
+
     # binance-futures_book_snapshot_5_2021-09-30_BTCUSDT.csv
     def load_data(self, path, date):
         df = pd.read_csv(path + '/binance-futures_book_snapshot_5_' + date + '_BTCUSDT.csv.gz',

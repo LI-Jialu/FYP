@@ -5,36 +5,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from download_order_book import download_order_book as dob
-import download_price as dp 
 from svm import svm_timepoint, svm_interval, train_test
+import generate_pos as gp
 
-
-
-'''
-# parameters 
-interval = 50 #50, 100, 200
-# the number of targeted principal componenets
-pcs = 5 # 2, 10
-
+##----------------------------------------------Parameters--------------------------------------------## 
+interval = 500 #500, 1000, 2000
+pcs = 5 # 2, 10, the number of targeted principal componenets
 starttime_0 = datetime.datetime.now()
-tt = train_test()'''
+tt = train_test()
 ##-------------------------------------------Data collection-----------------------------------------## 
 DOB = dob()
-
-'''DOB.download_order_book() 
-
-raw_data_path = './raw_data' # folder to store raw data
-tickers_list = ['BTC']
-tf = '1m' # 1 minute 
-DP = dp.download_price(tickers_list, tf, raw_data_path)
-DP.get_raw()
-DP.get_file('close')
-DP.get_file('volume')
-DP.combine_csv()
-
+# DOB.download_derivative_ticker() 
+DOB.download_order_book() 
 # Fear and Greedy index 
 fng = np.array(pd.read_csv('./Data/fng_index.csv', header = 0)['fng_value'])
-'''
+
 ##---------------------------------Data loading & preprocessing--------------------------------------## 
 # pd.set_option('display.max_columns', None)
 # path = 'C:/tardis_dataset/bitmex'
@@ -43,7 +28,6 @@ date_list = ['2021-09-23', '2021-09-24', '2021-09-25', '2021-09-26', '2021-09-27
              '2021-09-29', '2021-09-30', '2021-10-01', '2021-10-02', '2021-10-03', '2021-10-04', 
              '2021-10-05', '2021-10-06', ]
 day_num = len(date_list)
-print(os.getcwd())
 df = DOB.load_data(path, '2021-10-02')
 # df = [DOB.load_data(path, date_list[i]) for i in range(day_num)]
 
@@ -144,8 +128,17 @@ endtime_interval = datetime.datetime.now()
 print('The SVM using sliding window and PCA and Condition (Greed or Fear) running time:')
 print((endtime_interval - starttime_interval).seconds)
 
+##---------------------------------------from prediction to position--------------------------------## 
+GP = gp()
+# For Model 1: 
+pos = GP.kelly_criteria(model_1_pre_acc_1, model_1_pre_acc_m1, threshold_1, threshold_m1)
+GP.three_label_pos(in_file,out_file,pos)
+# For Model 2: 
 
-##-----------------------------------------------backtesting------------------------------------------## 
+##-----------------------------------------------backtesting----------------------------------------## 
+
+for pos_file in pos_files: 
+    backtest(pos_file)
 
 ##-----------------------------------------------analysis------------------------------------------## 
 # testing different time interval selection 
@@ -153,6 +146,7 @@ print((endtime_interval - starttime_interval).seconds)
 # plot accuracy plot comparison 
 # plot the prediction on the stock graph 
 # Can this model also work for ETH? 
+# View Pyfolio results
 
 ##-------------------------------------------------End---------------------------------------------## 
 endtime_0 = datetime.datetime.now()
