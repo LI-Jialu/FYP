@@ -79,10 +79,10 @@ class svm_interval:
         threshold2 = 2.0
         if(label_num == 3):
             for i in range(N-1):
-                y[i] = 0 if (abs(f2[i+1, 30] - f2[i, 30]) < threshold1) else (1 if (f2[i+1, 30] > f2[i, 30]) else -1)
+                y[i] = 0 if (abs(f2[i+1, 15] - f2[i, 15]) < threshold1) else (1 if (f2[i+1, 15] > f2[i, 15]) else -1)
         elif(label_num == 5):
             for i in range(N-1):
-                difference = f2[i+1, 30] - f2[i, 30]
+                difference = f2[i+1, 15] - f2[i, 15]
                 if(abs(difference) < threshold1):
                     y[i] = 0
                 elif(abs(difference) < threshold2):
@@ -90,6 +90,10 @@ class svm_interval:
                 else:
                     y[i] = 2 if difference > 0 else -2
         return y 
+    
+    def get_timestamp_array(self):
+        temp = split(np.array(self.df[['timestamp']]), self.window_num)
+        return np.array([t[-1] for t in temp])
 
 class svm_timepoint: 
     def __init__(self, df):
@@ -151,8 +155,11 @@ class svm_timepoint:
         y = np.zeros([N,], dtype = 'int')
         threshold = 0.1
         for i in range(N):
-            y[i] = 0 if (abs(f2[i+2, 10] - f2[i+1, 10]) < threshold) else (1 if (f2[i+2, 10] > f2[i+1, 10]) else -1)
+            y[i] = 0 if (abs(f2[i+2, 5] - f2[i+1, 5]) < threshold) else (1 if (f2[i+2, 5] > f2[i+1, 5]) else -1)
         return y 
+    
+    def get_timestamp_array(self):
+        return np.array(self.df[['timestamp']])
 
 class train_test: 
 
@@ -182,6 +189,10 @@ class train_test:
         print(ap)
         return pred 
 
+    def attach_timestamp(self, pred_y, timestamp):
+        temp1 = pred_y.reshape(-1,1)
+        temp2 = timestamp.reshape(-1,1)
+        return np.concatenate((temp2, temp1), axis = 1)
 
     
 
