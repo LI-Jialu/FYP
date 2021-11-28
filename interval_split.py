@@ -12,27 +12,19 @@ def normalize(X):
         else:
             X[:, j] = 0
     return X
-
-def _split(array, interval): 
-    rem = len(array)%interval
-    inter_num = (len(array)-rem)/interval
-    if rem != 0: 
-        array = array[:-rem]
-    splited = np.split(array,inter_num)
-    return splited 
     
-def split(array, interval):
-    splited = _split(array,interval)
+def split(array, window_num):
+    splited = np.split(array, window_num)
     return np.array([[*s[0][0:],*s[-1:][0]] for s in splited])
 
-def interval_mean(array, interval): 
-    temp = _split(array, interval)
-    mean = np.array([t.mean(axis = 0) for t in temp])
+def interval_mean(array, window_num): 
+    temp = np.split(array, window_num)
+    mean = np.array([t.mean(axis = 0) for t in temp]).reshape(-1,1)
     return mean
 
-def interval_var(array, interval): 
-    temp = _split(array, interval)
-    var = np.array([t.var(axis = 0) for t in temp])
+def interval_var(array, window_num): 
+    temp = np.split(array, window_num)
+    var = np.array([t.var(axis = 0) for t in temp]).reshape(-1,1)
     return var
 
 '''

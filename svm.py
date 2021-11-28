@@ -3,61 +3,60 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 import pickle
-from interval_split import split, normalize
+from interval_split import split, normalize, split_by_interval
 from interval_split import interval_mean as imean 
 from interval_split import interval_var as ivar 
 
 
 class svm_interval: 
     def __init__(self, df, interval):
-        self.df = df 
         self.interval = interval 
-
-    def interval_feature(self): 
-        timestamps = np.array(self.df['timestamp'])
-        N = timestamps.shape[0]
+        rem = df.shape[0] % interval
+        self.window_num = (df.shape[0]-rem)/interval 
+        self.df = df.drop(df.tail(rem).index)
         
 
+    def interval_feature(self):
         # Feature Set V1   
         f1_temp = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 
                             'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 
                             'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 
                             'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5',]]
         f1_temp = np.array(f1_temp)
-        f1 =split(f1_temp,self.interval)
+        f1 =split(f1_temp,self.window_num)
 
         # Feature Set V2: price difference and mid-price 
         temp1 = f1_temp[:, 0:5] - f1_temp[:, 10:15]
         temp2 = (f1_temp[:, 0:5] + f1_temp[:, 10:15]) * 0.5
         f2_temp = np.concatenate((temp1, temp2), axis = 1)
-        f2 = split(f2_temp,self.interval)
+        f2 = split(f2_temp,self.window_num)
 
         # Feature Set V3
         temp1 = (f1_temp[:, 4] - f1_temp[:, 0]).reshape(-1, 1)
         temp2 = (f1_temp[:, 10] - f1_temp[:, 14]).reshape(-1, 1)
         temp3 = abs(f1_temp[:, 1:5] - f1_temp[:, 0:4])
         temp4 = abs(f1_temp[:, 11:15] - f1_temp[:, 10:14])
-        f3 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
+        f3 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.window_num)
 
         # Feature Set V4: mean prices and volumes
         temp1 = np.mean(f1_temp[:, :5], axis = 1).reshape(-1, 1)
         temp2 = np.mean(f1_temp[:, 10:15], axis = 1).reshape(-1, 1)
         temp3 = np.mean(f1_temp[:, 5:10], axis = 1).reshape(-1, 1)
         temp4 = np.mean(f1_temp[:, 15:], axis = 1).reshape(-1, 1)
-        f4 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
+        f4 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.window_num)
 
         # Feature Set V5: accumulated differences
         temp1 = np.sum(f2_temp[:, 0:5], axis = 1).reshape(-1, 1)
         temp2 = np.sum(f1_temp[:, 5:10] - f1_temp[:, 15:20], axis = 1).reshape(-1, 1)
-        f5 = split(np.concatenate((temp1, temp2), axis = 1),self.interval)
+        f5 = split(np.concatenate((temp1, temp2), axis = 1),self.window_num)
 
         # Feature Set V6: Time interval for numbers of orders 
-        f6_temp =split(np.array(self.df[['timestamp']]),self.interval)
+        f6_temp =split(np.array(self.df[['timestamp']]),self.window_num)
         f6 = np.array([f[-1]-f[0] for f in f6_temp]).reshape(-1,1)
 
         # Feature Set V7: Mean and variance of bids and asks 
-        mean = imean(f1_temp, self.interval)
-        var = ivar(f1_temp, self.interval)
+        mean = imean(f1_temp, self.window_num)
+        var = ivar(f1_temp, self.window_num)
         f7 = np.concatenate((mean, var), axis = 1)
         
         # Feature Set V8: Price and Volume derivatives
