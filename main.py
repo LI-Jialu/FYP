@@ -22,17 +22,17 @@ tt = train_test()
 DOB = dob()
 DOB.download_order_book() 
 
-'''raw_data_path = './Data/raw_data' # folder to store raw data
-tickers_list = ['BTC',]
+raw_data_path = './raw_data' # folder to store raw data
+tickers_list = ['BTC']
 tf = '1m' # 1 minute 
 DP = dp.download_price(tickers_list, tf, raw_data_path)
 DP.get_raw()
 DP.get_file('close')
 DP.get_file('volume')
-DP.combine_csv()'''
+DP.combine_csv()
 
 # Fear and Greedy index 
-# fng = np.array(pd.read_csv('./Data/fng_index.csv', header = 0)['fng_value'])
+fng = np.array(pd.read_csv('./Data/fng_index.csv', header = 0)['fng_value'])
 
 ##---------------------------------Data loading & preprocessing--------------------------------------## 
 # pd.set_option('display.max_columns', None)
@@ -48,13 +48,16 @@ df = DOB.load_data(path, '2021-10-02')
 
 ##----------------------------------------SVM Single timepoint-------------------------------------------##
 starttime_point = datetime.datetime.now()
-svm_s = svm_timepoint(df)
+svm_s = svm_timepoint(df[10]) # use the data of 2021-10-03
 f1, f2, f3, f4, f5, f6 = svm_s.timpoint_feature()
-X = svm_s.generate_X(f1, f2, f3, f4, f5, f6,)
-y = svm_s.generate_y(f2, X.shape[0], 3)
+X = svm_s.generate_X(f1, f2, f3, f4, f5, f6)
+y = svm_s.generate_y(f2)
 X_train, X_test, y_train, y_test = tt.train_test_split(X, y)
+svm_model_timepoint = tt.trian(X_train, y_train)
+pred_y = tt.pred(svm_model_timepoint, X_test, y_test)
+tt.dump(svm_model_timepoint)
 endtime_point = datetime.datetime.now()
-print('The SVM using sliding window running time:')
+print('The SVM using one-timestamp datapoint running time:')
 print((endtime_point - starttime_point).seconds)
 
 ##----------------------------------------SVM Interval (3 labels)---------------------------------------## 
@@ -74,7 +77,6 @@ print((endtime_interval - starttime_interval).seconds)
 ##-------------------------------------------SVM Interval with PCA-------------------------------------## 
 
 ##-----------------------------------SVM Interval with PCA with condition ----------------------------## 
-
 X_train_greed = np.zeros((1,pcs), dtype = 'float64')
 X_test_greed = np.zeros((1,pcs), dtype = 'float64')
 y_train_greed = np.zeros((1,pcs), dtype = 'float64')
