@@ -2,6 +2,7 @@ import os
 from tardis_dev import datasets, get_exchange_details
 import logging
 import pandas as pd
+from datetime import datetime as dt
 
 
 class download_order_book: 
@@ -27,7 +28,7 @@ class download_order_book:
             # or get those values from 'deribit_details["datasets"]["symbols][]["dataTypes"] dict above
             # Allowed  'dataType' param values: 
             # 'trades', 'incremental_book_L2', 'quotes', 'derivative_ticker', 'options_chain', 'book_snapshot_5', 'book_snapshot_25', 'liquidations'.
-            data_types=['book_snapshot_25'],
+            data_types=['book_snapshot_5'],
             # filters=[Channel(name="depth", symbols=["btcusdt"])],
             from_date="2021-09-23",
             # to date is non inclusive
@@ -45,15 +46,21 @@ class download_order_book:
             
         )
 
-    def load_data(path, date):
-        df = pd.read_csv(path + '/book_snapshot_25/XBTUSD/bitmex_book_snapshot_25_' + date + '_XBTUSD.csv.gz',
+    # binance-futures_book_snapshot_5_2021-09-30_BTCUSDT.csv
+    def load_data(self, path, date):
+        print(os.getcwd())
+        df = pd.read_csv(path + '/binance-futures_book_snapshot_5_' + date + '_BTCUSDT.csv.gz',
                         header = 0,
                         names = ['timestamp', 'Pa1', 'Va1', 'Pb1', 'Vb1', 'Pa2', 'Va2', 'Pb2', 'Vb2', 
                                 'Pa3', 'Va3', 'Pb3', 'Vb3', 'Pa4', 'Va4', 'Pb4', 'Vb4', 
-                                'Pa5', 'Va5', 'Pb5', 'Vb5', 'Pa6', 'Va6', 'Pb6', 'Vb6', 
-                                'Pa7', 'Va7', 'Pb7', 'Vb7', 'Pa8', 'Va8', 'Pb8', 'Vb8', 
-                                'Pa9', 'Va9', 'Pb9', 'Vb9', 'Pa10', 'Va10', 'Pb10', 'Vb10'],
-                        usecols = [2] + list(range(4, 44)),
-                        compression = 'gzip')
+                                'Pa5', 'Va5', 'Pb5', 'Vb5'],
+                        usecols = [2] + list(range(4, 24)),
+                        compression = 'gzip' 
+                        )
+        print(df['timestamp'])
+        df['timestamp'] = [str(x)[:-6]+'.'+str(x)[-6:] for x in df['timestamp']]
+        print(df['timestamp'][0])
+        df['timestamp'] = [dt.fromtimestamp(float(x)) for x in df['timestamp']]
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
         return df
 

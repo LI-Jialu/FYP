@@ -146,7 +146,7 @@ class svm_timepoint:
         X = np.concatenate((f1, f2, f3, f4, f5), axis = 1)
         X = np.delete(X, 0, axis = 0)
         X = np.concatenate((X, f6), axis = 1)
-        X = np.delete(X, -2, axis = 0)
+        X = np.delete(X, -1, axis = 0)
         X = normalize(X)
         return X
 
