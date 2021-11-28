@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 import pickle
-from interval_split import split, normalize, split_by_interval
+from interval_split import split, normalize
 from interval_split import interval_mean as imean 
 from interval_split import interval_var as ivar 
 

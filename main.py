@@ -10,17 +10,18 @@ from svm import svm_timepoint, svm_interval, train_test
 
 
 
-
+'''
 # parameters 
 interval = 50 #50, 100, 200
 # the number of targeted principal componenets
 pcs = 5 # 2, 10
 
 starttime_0 = datetime.datetime.now()
-tt = train_test()
+tt = train_test()'''
 ##-------------------------------------------Data collection-----------------------------------------## 
 DOB = dob()
-DOB.download_order_book() 
+
+'''DOB.download_order_book() 
 
 raw_data_path = './raw_data' # folder to store raw data
 tickers_list = ['BTC']
@@ -33,7 +34,7 @@ DP.combine_csv()
 
 # Fear and Greedy index 
 fng = np.array(pd.read_csv('./Data/fng_index.csv', header = 0)['fng_value'])
-
+'''
 ##---------------------------------Data loading & preprocessing--------------------------------------## 
 # pd.set_option('display.max_columns', None)
 # path = 'C:/tardis_dataset/bitmex'
@@ -42,7 +43,7 @@ date_list = ['2021-09-23', '2021-09-24', '2021-09-25', '2021-09-26', '2021-09-27
              '2021-09-29', '2021-09-30', '2021-10-01', '2021-10-02', '2021-10-03', '2021-10-04', 
              '2021-10-05', '2021-10-06', ]
 day_num = len(date_list)
-print(os.chdir('..'))
+print(os.getcwd())
 df = DOB.load_data(path, '2021-10-02')
 # df = [DOB.load_data(path, date_list[i]) for i in range(day_num)]
 

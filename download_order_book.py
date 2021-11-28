@@ -48,7 +48,6 @@ class download_order_book:
 
     # binance-futures_book_snapshot_5_2021-09-30_BTCUSDT.csv
     def load_data(self, path, date):
-        print(os.getcwd())
         df = pd.read_csv(path + '/binance-futures_book_snapshot_5_' + date + '_BTCUSDT.csv.gz',
                         header = 0,
                         names = ['timestamp', 'Pa1', 'Va1', 'Pb1', 'Vb1', 'Pa2', 'Va2', 'Pb2', 'Vb2', 

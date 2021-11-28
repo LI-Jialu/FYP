@@ -12,9 +12,7 @@ class CommisionScheme(bt.CommInfoBase):
         return abs(size) * self.p.commission
 
 class TestStrategy(bt.Strategy):
-    params = (
-        ("threshold", 0.025),
-    )
+    params = (("threshold", 0.025))
 
     def log(self, txt, dt=None):
         """ Logging function fot this strategy"""
@@ -95,53 +93,21 @@ class TestStrategy(bt.Strategy):
     '''
 
     def next(self):
-        date = self.data.datetime.date()
-        track_trades = dict()
-        total_value = self.broker.get_value() 
-
+        date = self.data.datetime.datetime()
+        total_value = self.broker.get_value()
 
         for d in self.datas:
             if date not in d.target:
-                if self.getposition(d):
-                    self.close(d)
                 continue
-            
-            ''''''''''''''''''''''''
-            ' params: (For each crypto currency)'
-            ' track_trades = {date:{units: units_to_trade, threshold: 0 or 1} }'
-            ' target_allocation: target_weight (in %) '
-            ' current_allocation: current position / portfolio_value '
-            ''''''''''''''''''''''''
+            else:
+                target_allocation = d.target[date]
+                trade_units = (target_allocation * total_value / d.close[0])
+                if trade_units < 0:
+                    self.sell(d, size=abs(trade_units))
 
-            
-            track_trades[d] = dict()
-            target_allocation = d.target[date] 
-            ## ?? the position of self.datas[i]
-            value = self.broker.get_value(datas=[d])
-            current_allocation = value / total_value
-            net_allocation = target_allocation - current_allocation
-            units_to_trade = (
-                (net_allocation) * total_value / d.close[0]
-            )
-            track_trades[d]["units"] = units_to_trade
-            # Can check to make sure there is enough distance away from ideal to trade.
-            track_trades[d]["threshold"] = abs(net_allocation) > self.p.threshold
+                elif trade_units > 0:
+                    self.buy(d, size=abs(trade_units))
 
-        rebalance = False
-        for values in track_trades.values():
-            if values["threshold"]:
-                rebalance = True
-
-        if not rebalance:
-            return
-
-        # Sell shares first
-        for d, value in track_trades.items():
-            if value["units"] < 0:
-                self.sell(d, size=value["units"])
-
-        # Buy shares second
-        for d, value in track_trades.items():
-            if value["units"] > 0:
-                self.buy(d, size=value["units"])
-
+                else:
+                    self.close(d)
+                    # if hit the stop loss line for several times, then st
