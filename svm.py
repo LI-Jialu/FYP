@@ -6,7 +6,6 @@ import pickle
 from interval_split import split, normalize
 from interval_split import interval_mean as imean 
 from interval_split import interval_var as ivar 
-from sklearn.utils import class_weight
 
 
 class svm_interval: 
@@ -17,7 +16,7 @@ class svm_interval:
     def interval_feature(self): 
         timestamps = np.array(self.df['timestamp'])
         N = timestamps.shape[0]
-        ##### modify N here????
+        
 
         # Feature Set V1   
         f1_temp = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 
@@ -98,9 +97,6 @@ class svm_timepoint:
         self.df = df 
         
     def timpoint_feature(self):
-        timestamps = np.array(self.df['timestamp'])
-        N = timestamps.shape[0]
-
         # Feature Set V1
         f1 = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 
                     'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 
@@ -141,17 +137,17 @@ class svm_timepoint:
 
         return f1, f2, f3, f4, f5, f6 
     
-    def _X(self, f1, f2, f3, f4, f5, f6): 
+    def generate_X(self, f1, f2, f3, f4, f5, f6): 
     # Concatenate all features and normalize
         X = np.concatenate((f1, f2, f3, f4, f5), axis = 1)
         X = np.delete(X, 0, axis = 0)
         X = np.concatenate((X, f6), axis = 1)
-        X = np.delete(X, -2, axis = 0)
+        X = np.delete(X, -1, axis = 0)
         X = normalize(X)
         return X
 
-    def _y(self, f2, N): 
-        N = N - 2
+    def generate_y(self, f2): 
+        N = f2.shape[0] - 2
         # mid-price trend label
         y = np.zeros([N,], dtype = 'int')
         threshold = 0.1

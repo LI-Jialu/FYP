@@ -22,7 +22,7 @@ DOB = dob()
 DOB.download_order_book() 
 
 raw_data_path = './raw_data' # folder to store raw data
-tickers_list = ['BTC','ETH']
+tickers_list = ['BTC']
 tf = '1m' # 1 minute 
 DP = dp.download_price(tickers_list, tf, raw_data_path)
 DP.get_raw()
@@ -43,17 +43,23 @@ df = [dob.load_data(path, date_list[i]) for i in range(day_num)]
 
 ##----------------------------------------SVM Single timepoint-------------------------------------------##
 starttime_point = datetime.datetime.now()
-svm_s = svm_timepoint(df)
+svm_s = svm_timepoint(df[10]) # use the data of 2021-10-03
 f1, f2, f3, f4, f5, f6 = svm_s.timpoint_feature()
+X = svm_s.generate_X(f1, f2, f3, f4, f5, f6)
+y = svm_s.generate_y(f2)
+X_train, X_test, y_train, y_test = tt.train_test_split(X, y)
+svm_model_timepoint = tt.trian(X_train, y_train)
+pred_y = tt.pred(svm_model_timepoint, X_test, y_test)
+tt.dump(svm_model_timepoint)
 endtime_point = datetime.datetime.now()
-print('The SVM using sliding window running time:')
+print('The SVM using one-timestamp datapoint running time:')
 print((endtime_point - starttime_point).seconds)
 
 ##----------------------------------------SVM Interval (3 labels)---------------------------------------## 
-interval = 5 #10, 20
+interval = 100 #10, 20
 starttime_interval = datetime.datetime.now()
-svm_i = svm_interval(df, interval)
-f1, f2, f3, f4, f5, f6, f7 = svm_i.interval_feature()
+svm_i = svm_interval(df[10], interval)
+f1, f2, f3, f4, f5, f6, f7, f8 = svm_i.interval_feature()
 X = svm_i.generate_X(f1, f2, f3, f4, f5, f6, f7)
 y = svm_i.generate_y(f2, X.shape[0], 3)
 X_train, X_test, y_train, y_test = tt.train_test_split(X, y)
@@ -67,7 +73,6 @@ print((endtime_interval - starttime_interval).seconds)
 ##-------------------------------------------SVM Interval with PCA-------------------------------------## 
 
 ##-----------------------------------SVM Interval with PCA with condition ----------------------------## 
-interval = 5 #10, 20
 # the number of targeted principal componenets
 pcs = 5 # 2, 10
 X_train_greed = np.zeros((1,pcs), dtype = 'float64')
