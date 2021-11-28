@@ -1,0 +1,20 @@
+Binance API
+
+Name: 
+fyp 
+
+API Key: 
+sMJ11bSsiWyMcdOJeqO6PBprsIF6BFSgQ6su9se6xi5Nh9ulHKQiM0rnuCwp6edz
+
+Secret key: 
+hPeJyt9bCS73tfQQyDlKiPPmNEAxhndDkCAmvlwZ3uNKNcnne9POdvvDVZes4d4p
+
+
+HMAC_SHA256 Key registered
+Save these values right now. They won't be shown ever again!
+
+API Key: 
+vzHiMIbYf3JvTj89t7Q2fzXINB9F7uSDVGHOvw6KeuZx2pV9W27Sj3iW0GPClaVJ
+
+Secret Key: 
+fspuQPZSzS002ljbt75t1AfhAdHXv8o0Ry2sWuDxaUoGilwwuuOpw0SbQcWvQ5PG

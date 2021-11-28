@@ -18,28 +18,31 @@ class download_order_book:
         return f"{exchange}/{data_type}/{date.strftime('%Y-%m-%d')}_{symbol}.{format}.gz"
 
     def download_order_book(self): 
-        # os.chdir('.\Data')
+        os.chdir('.\Data')
         logging.basicConfig(level=logging.DEBUG)
         datasets.download(
             # one of https://api.tardis.dev/v1/exchanges with supportsDatasets:true - use 'id' value
-            exchange="bitmex",
+            exchange="binance-futures",
             # accepted data types - 'datasets.symbols[].dataTypes' field in https://api.tardis.dev/v1/exchanges/deribit,
             # or get those values from 'deribit_details["datasets"]["symbols][]["dataTypes"] dict above
-            # data_types=["incremental_book_L2", "trades", "quotes", "derivative_ticker", "book_snapshot_25", "liquidations"],
-            data_types=[ "book_snapshot_5"],
+            # Allowed  'dataType' param values: 
+            # 'trades', 'incremental_book_L2', 'quotes', 'derivative_ticker', 'options_chain', 'book_snapshot_5', 'book_snapshot_25', 'liquidations'.
+            data_types=['book_snapshot_25'],
+            # filters=[Channel(name="depth", symbols=["btcusdt"])],
             from_date="2021-09-23",
             # to date is non inclusive
             to_date="2021-10-07",
             # accepted values: 'datasets.symbols[].id' field in https://api.tardis.dev/v1/exchanges/deribit
-            symbols=["XBTUSD"],
+            symbols=["BTCUSDT"],
             # (optional) your API key to get access to non sample data as well
             api_key="TD.qtKSUEXoqaY7HYJC.WbIkzzx6IlUzmfW.HpGRMPQvrzWmja0.ufinV2kPJLc8WTl.1Nzl5-0NRFZkP7m.3BdA",
             # (optional) path where data will be downloaded into, default dir is './datasets'
-            download_dir="./Data",
+            download_dir="./Order_book",
             # (optional) - one can customize downloaded file name/path (flat dir strucure, or nested etc) - by default function 'default_file_name' is used
             # get_filename=default_file_name,
             # (optional) file_name_nested will download data to nested directory structure (split by exchange and data type)
             # get_filename=file_name_nested,
+            
         )
 
     def load_data(path, date):
@@ -53,3 +56,4 @@ class download_order_book:
                         usecols = [2] + list(range(4, 44)),
                         compression = 'gzip')
         return df
+

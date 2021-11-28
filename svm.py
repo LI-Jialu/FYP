@@ -6,7 +6,6 @@ import pickle
 from interval_split import split, normalize
 from interval_split import interval_mean as imean 
 from interval_split import interval_var as ivar 
-from isort.utils import difference
 from sklearn.utils import class_weight
 
 
@@ -35,27 +34,27 @@ class svm_interval:
         f2 = split(f2_temp,self.interval)
 
         # Feature Set V3
-        temp1 = (f1_temp[:, 9] - f1_temp[:, 0]).reshape(N, 1)
-        temp2 = (f1_temp[:, 20] - f1_temp[:, 29]).reshape(N, 1)
+        temp1 = (f1_temp[:, 9] - f1_temp[:, 0]).reshape(-1, 1)
+        temp2 = (f1_temp[:, 20] - f1_temp[:, 29]).reshape(-1, 1)
         temp3 = abs(f1_temp[:, 1:10] - f1_temp[:, 0:9])
         temp4 = abs(f1_temp[:, 21:30] - f1_temp[:, 20:29])
         f3 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
 
         # Feature Set V4: mean prices and volumes
-        temp1 = np.mean(f1_temp[:, :10], axis = 1).reshape(N, 1)
-        temp2 = np.mean(f1_temp[:, 20:30], axis = 1).reshape(N, 1)
-        temp3 = np.mean(f1_temp[:, 10:20], axis = 1).reshape(N, 1)
-        temp4 = np.mean(f1_temp[:, 30:], axis = 1).reshape(N, 1)
+        temp1 = np.mean(f1_temp[:, :10], axis = 1).reshape(-1, 1)
+        temp2 = np.mean(f1_temp[:, 20:30], axis = 1).reshape(-1, 1)
+        temp3 = np.mean(f1_temp[:, 10:20], axis = 1).reshape(-1, 1)
+        temp4 = np.mean(f1_temp[:, 30:], axis = 1).reshape(-1, 1)
         f4 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
 
         # Feature Set V5: accumulated differences
-        temp1 = np.sum(f2_temp[:, 0:10], axis = 1).reshape(N, 1)
-        temp2 = np.sum(f1_temp[:, 10:20] - f1_temp[:, 30:40], axis = 1).reshape(N, 1)
+        temp1 = np.sum(f2_temp[:, 0:10], axis = 1).reshape(-1, 1)
+        temp2 = np.sum(f1_temp[:, 10:20] - f1_temp[:, 30:40], axis = 1).reshape(-1, 1)
         f5 = split(np.concatenate((temp1, temp2), axis = 1),self.interval)
 
         # Feature Set V6: Time interval for numbers of orders 
         f6_temp =split(np.array(self.df[['timestamp']]),self.interval)
-        f6 = np.array([f[-1]-f[0] for f in f6_temp]).reshape((,1))
+        f6 = np.array([f[-1]-f[0] for f in f6_temp]).reshape(-1,1)
 
         # Feature Set V7: Mean and variance of bids and asks 
         mean = imean(f1_temp, self.interval)
@@ -71,7 +70,7 @@ class svm_interval:
     def generate_X(self, f1, f2, f3, f4, f5, f6, f7, f8): 
     # Concatenate all features and normalize
         X = np.concatenate((f1, f2, f3, f4, f5, f6, f7, f8), axis = 1)
-        X = np.delete(X, N-1, axis = 0)
+        X = np.delete(X, -1, axis = 0)
         X = normalize(X)
         return X
 
@@ -115,22 +114,22 @@ class svm_timepoint:
         f2 = np.concatenate((temp1, temp2), axis = 1)
 
         # Feature Set V3
-        temp1 = (f1[:, 9] - f1[:, 0]).reshape(N, 1)
-        temp2 = (f1[:, 20] - f1[:, 29]).reshape(N, 1)
+        temp1 = (f1[:, 9] - f1[:, 0]).reshape(-1, 1)
+        temp2 = (f1[:, 20] - f1[:, 29]).reshape(-1, 1)
         temp3 = abs(f1[:, 1:10] - f1[:, 0:9])
         temp4 = abs(f1[:, 21:30] - f1[:, 20:29])
         f3 = np.concatenate((temp1, temp2, temp3, temp4), axis = 1)
 
         # Feature Set V4: mean prices and volumes
-        temp1 = np.mean(f1[:, :10], axis = 1).reshape(N, 1)
-        temp2 = np.mean(f1[:, 20:30], axis = 1).reshape(N, 1)
-        temp3 = np.mean(f1[:, 10:20], axis = 1).reshape(N, 1)
-        temp4 = np.mean(f1[:, 30:], axis = 1).reshape(N, 1)
+        temp1 = np.mean(f1[:, :10], axis = 1).reshape(-1, 1)
+        temp2 = np.mean(f1[:, 20:30], axis = 1).reshape(-1, 1)
+        temp3 = np.mean(f1[:, 10:20], axis = 1).reshape(-1, 1)
+        temp4 = np.mean(f1[:, 30:], axis = 1).reshape(-1, 1)
         f4 = np.concatenate((temp1, temp2, temp3, temp4), axis = 1)
 
         # Feature Set V5: accumulated differences
-        temp1 = np.sum(f2[:, 0:10], axis = 1).reshape(N, 1)
-        temp2 = np.sum(f1[:, 10:20] - f1[:, 30:40], axis = 1).reshape(N, 1)
+        temp1 = np.sum(f2[:, 0:10], axis = 1).reshape(-1, 1)
+        temp2 = np.sum(f1[:, 10:20] - f1[:, 30:40], axis = 1).reshape(-1, 1)
         f5 = np.concatenate((temp1, temp2), axis = 1)
 
         # Feature Set V6: price and volume derivatives

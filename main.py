@@ -18,7 +18,9 @@ import pyfolio as pf
 
 starttime_0 = datetime.datetime.now()
 ##-------------------------------------------Data collection-----------------------------------------## 
-dob.download_order_book() 
+DOB = dob()
+DOB.download_order_book() 
+
 raw_data_path = './raw_data' # folder to store raw data
 tickers_list = ['BTC','ETH']
 tf = '1m' # 1 minute 
@@ -119,11 +121,11 @@ cerebro.broker.addcommissioninfo(comminfo)
 
 '''
 prediction = np.to_dict(y_pred) 
-ticker, target = prediction.items()
+ticker, pred = prediction.items()
 datapath = './data'+ticker+'_'+'.csv'
 bt_data = btfeeds.GenericCSVData(dataname=datapath,
-    fromdate = datetime(2021, 10, 1),
-    todate = datetime(2021, 11, 1), 
+    fromdate = datetime(2021, 9, 23),
+    todate = datetime(2021, 10, 7), 
     nullvalue = 0.0,
     timeframe=bt.TimeFrame.Minutes,
     compression=1,

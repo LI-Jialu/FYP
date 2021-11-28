@@ -70,6 +70,30 @@ class TestStrategy(bt.Strategy):
                 for date, allocation in d.target.items()
             }
 
+    '''
+    3-label: 
+    Trade with constatnt intial weight 
+    1. If pred_0 = 1, (will rise in the coming interval), close until next -1 
+    2. If pred_0 = 0, (will be stationary): pass
+    3. If pred_0 = -1, close until next 1 
+    '''
+
+    '''
+    5-label: 
+    2: more wegiht, 1: less weight 
+    1. If 2: 
+        1.1. 2->2 
+        1.2. 2->1 
+        1.3. 2->0 
+        1.4. 2->(-) Close 
+    Similar 
+    '''
+
+    '''
+    regression: 
+    weight -proportional-> (the regression result - current price) 
+    '''
+
     def next(self):
         date = self.data.datetime.date()
         track_trades = dict()
@@ -88,6 +112,7 @@ class TestStrategy(bt.Strategy):
             ' target_allocation: target_weight (in %) '
             ' current_allocation: current position / portfolio_value '
             ''''''''''''''''''''''''
+
             
             track_trades[d] = dict()
             target_allocation = d.target[date] 
