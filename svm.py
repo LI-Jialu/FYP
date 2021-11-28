@@ -6,6 +6,8 @@ import pickle
 from interval_split import split, normalize
 from interval_split import interval_mean as imean 
 from interval_split import interval_var as ivar 
+from isort.utils import difference
+from sklearn.utils import class_weight
 
 
 class svm_interval: 
@@ -16,6 +18,7 @@ class svm_interval:
     def interval_feature(self): 
         timestamps = np.array(self.df['timestamp'])
         N = timestamps.shape[0]
+        ##### modify N here????
 
         # Feature Set V1   
         f1_temp = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
@@ -52,29 +55,43 @@ class svm_interval:
 
         # Feature Set V6: Time interval for numbers of orders 
         f6_temp =split(np.array(self.df[['timestamp']]),self.interval)
-        f6 = np.array([f[-1]-f[0] for f in f6_temp])
+        f6 = np.array([f[-1]-f[0] for f in f6_temp]).reshape((,1))
 
         # Feature Set V7: Mean and variance of bids and asks 
         mean = imean(f1_temp, self.interval)
         var = ivar(f1_temp, self.interval)
         f7 = np.concatenate((mean, var), axis = 1)
+        
+        # Feature Set V8: Price and Volume derivatives
+        f8 = (f1[:, 40:80] - f1[:, 0:40]) / f6
     
-        return f1, f2, f3, f4, f5, f6, f7
+        return f1, f2, f3, f4, f5, f6, f7, f8
 
 
-    def _X(self, f1, f2, f3, f4, f5, f6, f7): 
+    def generate_X(self, f1, f2, f3, f4, f5, f6, f7, f8): 
     # Concatenate all features and normalize
-        X = np.concatenate((f1, f2, f3, f4, f5, f6, f7), axis = 1)
+        X = np.concatenate((f1, f2, f3, f4, f5, f6, f7, f8), axis = 1)
+        X = np.delete(X, N-1, axis = 0)
         X = normalize(X)
         return X
 
-    def _y(self, f2, N): 
-        N = N - 2
+    def generate_y(self, f2, N, label_num = 3): 
         # mid-price trend label
-        y = np.zeros([N,], dtype = 'int')
-        threshold = 0.1
-        for i in range(N):
-            y[i] = 0 if (abs(f2[i+2, 10] - f2[i+1, 10]) < threshold) else (1 if (f2[i+2, 10] > f2[i+1, 10]) else -1)
+        y = np.zeros([N-1,], dtype = 'int')
+        threshold1 = 0.1
+        threshold2 = 2.0
+        if(label_num == 3):
+            for i in range(N-1):
+                y[i] = 0 if (abs(f2[i+1, 30] - f2[i, 30]) < threshold1) else (1 if (f2[i+1, 30] > f2[i, 30]) else -1)
+        elif(label_num == 5):
+            for i in range(N-1):
+                difference = f2[i+1, 30] - f2[i, 30]
+                if(abs(difference) < threshold1):
+                    y[i] = 0
+                elif(abs(difference) < threshold2):
+                    y[i] = 1 if difference > 0 else -1
+                else:
+                    y[i] = 2 if difference > 0 else -2
         return y 
 
 class svm_timepoint: 
@@ -150,12 +167,11 @@ class train_test:
 
     def train_test_split(self, X, y): 
         # train-test split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, stratify = y)
-        return [X_train, X_test, y_train, y_test]
+        return train_test_split(X, y, test_size = 0.2, stratify = y)
 
     def trian(self, X_train, y_train): 
-        model = svm.SVC(kernel = 'rbf')
-        model.fit(X_train, y_train)
+        model = svm.LinearSVC()
+        model.fit(X_train, y_train, class_weight = 'balanced')
         return model 
 
     def dump(self, model): 
