@@ -20,36 +20,36 @@ class svm_interval:
         ##### modify N here????
 
         # Feature Set V1   
-        f1_temp = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
-                'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 'Va6', 'Va7', 'Va8', 'Va9', 'Va10',
-                'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 'Pb6', 'Pb7', 'Pb8', 'Pb9', 'Pb10',
-                'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5', 'Vb6', 'Vb7', 'Vb8', 'Vb9', 'Vb10',]]
+        f1_temp = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 
+                            'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 
+                            'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 
+                            'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5',]]
         f1_temp = np.array(f1_temp)
         f1 =split(f1_temp,self.interval)
 
         # Feature Set V2: price difference and mid-price 
-        temp1 = f1_temp[:, 0:10] - f1_temp[:, 20:30]
-        temp2 = (f1_temp[:, 0:10] + f1_temp[:, 20:30]) * 0.5
+        temp1 = f1_temp[:, 0:5] - f1_temp[:, 10:15]
+        temp2 = (f1_temp[:, 0:5] + f1_temp[:, 10:15]) * 0.5
         f2_temp = np.concatenate((temp1, temp2), axis = 1)
         f2 = split(f2_temp,self.interval)
 
         # Feature Set V3
-        temp1 = (f1_temp[:, 9] - f1_temp[:, 0]).reshape(-1, 1)
-        temp2 = (f1_temp[:, 20] - f1_temp[:, 29]).reshape(-1, 1)
-        temp3 = abs(f1_temp[:, 1:10] - f1_temp[:, 0:9])
-        temp4 = abs(f1_temp[:, 21:30] - f1_temp[:, 20:29])
+        temp1 = (f1_temp[:, 4] - f1_temp[:, 0]).reshape(-1, 1)
+        temp2 = (f1_temp[:, 10] - f1_temp[:, 14]).reshape(-1, 1)
+        temp3 = abs(f1_temp[:, 1:5] - f1_temp[:, 0:4])
+        temp4 = abs(f1_temp[:, 11:15] - f1_temp[:, 10:14])
         f3 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
 
         # Feature Set V4: mean prices and volumes
-        temp1 = np.mean(f1_temp[:, :10], axis = 1).reshape(-1, 1)
-        temp2 = np.mean(f1_temp[:, 20:30], axis = 1).reshape(-1, 1)
-        temp3 = np.mean(f1_temp[:, 10:20], axis = 1).reshape(-1, 1)
-        temp4 = np.mean(f1_temp[:, 30:], axis = 1).reshape(-1, 1)
+        temp1 = np.mean(f1_temp[:, :5], axis = 1).reshape(-1, 1)
+        temp2 = np.mean(f1_temp[:, 10:15], axis = 1).reshape(-1, 1)
+        temp3 = np.mean(f1_temp[:, 5:10], axis = 1).reshape(-1, 1)
+        temp4 = np.mean(f1_temp[:, 15:], axis = 1).reshape(-1, 1)
         f4 = split(np.concatenate((temp1, temp2, temp3, temp4), axis = 1),self.interval)
 
         # Feature Set V5: accumulated differences
-        temp1 = np.sum(f2_temp[:, 0:10], axis = 1).reshape(-1, 1)
-        temp2 = np.sum(f1_temp[:, 10:20] - f1_temp[:, 30:40], axis = 1).reshape(-1, 1)
+        temp1 = np.sum(f2_temp[:, 0:5], axis = 1).reshape(-1, 1)
+        temp2 = np.sum(f1_temp[:, 5:10] - f1_temp[:, 15:20], axis = 1).reshape(-1, 1)
         f5 = split(np.concatenate((temp1, temp2), axis = 1),self.interval)
 
         # Feature Set V6: Time interval for numbers of orders 
@@ -62,7 +62,7 @@ class svm_interval:
         f7 = np.concatenate((mean, var), axis = 1)
         
         # Feature Set V8: Price and Volume derivatives
-        f8 = (f1[:, 40:80] - f1[:, 0:40]) / f6
+        f8 = (f1[:, 20:40] - f1[:, 0:20]) / f6
     
         return f1, f2, f3, f4, f5, f6, f7, f8
 
