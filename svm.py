@@ -102,46 +102,46 @@ class svm_timepoint:
         N = timestamps.shape[0]
 
         # Feature Set V1
-        f1 = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 'Pa6', 'Pa7', 'Pa8', 'Pa9', 'Pa10',
-                'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 'Va6', 'Va7', 'Va8', 'Va9', 'Va10',
-                'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 'Pb6', 'Pb7', 'Pb8', 'Pb9', 'Pb10',
-                'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5', 'Vb6', 'Vb7', 'Vb8', 'Vb9', 'Vb10',]]
+        f1 = self.df[['Pa1', 'Pa2', 'Pa3', 'Pa4', 'Pa5', 
+                    'Va1', 'Va2', 'Va3', 'Va4', 'Va5', 
+                    'Pb1', 'Pb2', 'Pb3', 'Pb4', 'Pb5', 
+                    'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5', ]]
         f1 = np.array(f1)
 
         # Feature Set V2
-        temp1 = f1[:, 0:10] - f1[:, 20:30]
-        temp2 = (f1[:, 0:10] + f1[:, 20:30]) * 0.5
+        temp1 = f1[:, 0:5] - f1[:, 10:15]
+        temp2 = (f1[:, 0:5] + f1[:, 10:15]) * 0.5
         f2 = np.concatenate((temp1, temp2), axis = 1)
 
         # Feature Set V3
-        temp1 = (f1[:, 9] - f1[:, 0]).reshape(-1, 1)
-        temp2 = (f1[:, 20] - f1[:, 29]).reshape(-1, 1)
-        temp3 = abs(f1[:, 1:10] - f1[:, 0:9])
-        temp4 = abs(f1[:, 21:30] - f1[:, 20:29])
+        temp1 = (f1[:, 4] - f1[:, 0]).reshape(-1, 1)
+        temp2 = (f1[:, 10] - f1[:, 14]).reshape(-1, 1)
+        temp3 = abs(f1[:, 1:5] - f1[:, 0:4])
+        temp4 = abs(f1[:, 11:15] - f1[:, 10:14])
         f3 = np.concatenate((temp1, temp2, temp3, temp4), axis = 1)
 
         # Feature Set V4: mean prices and volumes
-        temp1 = np.mean(f1[:, :10], axis = 1).reshape(-1, 1)
-        temp2 = np.mean(f1[:, 20:30], axis = 1).reshape(-1, 1)
-        temp3 = np.mean(f1[:, 10:20], axis = 1).reshape(-1, 1)
-        temp4 = np.mean(f1[:, 30:], axis = 1).reshape(-1, 1)
+        temp1 = np.mean(f1[:, :5], axis = 1).reshape(-1, 1)
+        temp2 = np.mean(f1[:, 10:15], axis = 1).reshape(-1, 1)
+        temp3 = np.mean(f1[:, 5:10], axis = 1).reshape(-1, 1)
+        temp4 = np.mean(f1[:, 15:], axis = 1).reshape(-1, 1)
         f4 = np.concatenate((temp1, temp2, temp3, temp4), axis = 1)
 
         # Feature Set V5: accumulated differences
-        temp1 = np.sum(f2[:, 0:10], axis = 1).reshape(-1, 1)
-        temp2 = np.sum(f1[:, 10:20] - f1[:, 30:40], axis = 1).reshape(-1, 1)
+        temp1 = np.sum(f2[:, 0:5], axis = 1).reshape(-1, 1)
+        temp2 = np.sum(f1[:, 5:10] - f1[:, 15:20], axis = 1).reshape(-1, 1)
         f5 = np.concatenate((temp1, temp2), axis = 1)
 
         # Feature Set V6: price and volume derivatives
-        temp1 = f1[1:, 0:10] - f1[:-1, 0:10]
-        temp2 = f1[1:, 20:30] - f1[:-1, 20:30]
-        temp3 = f1[1:, 10:20] - f1[:-1, 10:20]
-        temp4 = f1[1:, 30:40] - f1[:-1, 30:40]
+        temp1 = f1[1:, 0:5] - f1[:-1, 0:5]
+        temp2 = f1[1:, 10:15] - f1[:-1, 10:15]
+        temp3 = f1[1:, 5:10] - f1[:-1, 5:10]
+        temp4 = f1[1:, 15:20] - f1[:-1, 15:20]
         f6 = np.concatenate((temp1, temp2, temp3, temp4), axis = 1)
 
         return f1, f2, f3, f4, f5, f6 
     
-    def _X(self, f1, f2, f3, f4, f5,f6): 
+    def _X(self, f1, f2, f3, f4, f5, f6): 
     # Concatenate all features and normalize
         X = np.concatenate((f1, f2, f3, f4, f5), axis = 1)
         X = np.delete(X, 0, axis = 0)
