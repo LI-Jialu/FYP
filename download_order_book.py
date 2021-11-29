@@ -72,9 +72,9 @@ class download_order_book:
                         usecols = [2] + list(range(4, 24)),
                         compression = 'gzip' 
                         )
-        print(df['timestamp'])
+        # print(df['timestamp'])
         df['timestamp'] = [str(x)[:-6]+'.'+str(x)[-6:] for x in df['timestamp']]
-        print(df['timestamp'][0])
+        # print(df['timestamp'][0])
         df['timestamp'] = [dt.fromtimestamp(float(x)) for x in df['timestamp']]
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         return df
