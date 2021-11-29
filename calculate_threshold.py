@@ -23,7 +23,8 @@ splited_df = pd.DataFrame()
 for s in splited_array:
     splited_df = pd.concat([splited_df, s],axis = 1)
 splited_df = splited_df.T
-
+to_csv_data = splited_df.iloc[:,[0,1,3]]
+to_csv_data.to_csv('./Data/interval_data.csv')
 # each interval's pct change 
 ret = splited_df.iloc[:,1:].pct_change().dropna()
 

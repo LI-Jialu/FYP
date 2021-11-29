@@ -4,17 +4,18 @@ import backtrader.feeds as btfeeds
 import analysis as analysis
 import pyfolio as pf
 from datetime import datetime
+import pandas as pd
 
 class backtest():
     def __init__(self) -> None:
         pass
 
-    def backtesting():
+    def backtesting(self, price_path, weight_path):
         # Initialize cerebro 
         cerebro = bt.Cerebro()
         cerebro.broker.setcash(1000000)
         cerebro.broker.addcommissioninfo(CommisionScheme(commission=0.0004,automargin = 1))
-        bt_data = btfeeds.GenericCSVData(dataname=datapath,
+        bt_data = btfeeds.GenericCSVData(dataname=price_path,
                 fromdate = datetime(2021, 9, 23),
                 todate = datetime(2021, 10, 7), 
                 nullvalue = 0.0,
@@ -25,6 +26,7 @@ class backtest():
                 Open = 1,
                 Close = 2,
                 openinterest=-1)
+        target = pd.readcsv(weight_path).to_dict().values()
         bt_data.target = target
         cerebro.adddata(bt_data)
             

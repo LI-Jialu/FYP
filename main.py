@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from download_order_book import download_order_book as dob
 from model_builder import model_builder, conditional_model_builder
 import generate_pos as gp
+from backtesting import backtesting
 
 ##----------------------------------------------Parameters--------------------------------------------## 
 interval = 500 #500, 1000, 2000
@@ -40,15 +41,31 @@ conditional_report_list = tt_result[8:]
 
 ##---------------------------------------from prediction to position--------------------------------## 
 GP = gp()
-# For Model 1: 
-pos = GP.kelly_criteria(model_1_pre_acc_1, model_1_pre_acc_m1, threshold_1, threshold_m1)
-GP.three_label_pos(in_file,out_file,pos)
-# For Model 2: 
+threshold1 = 5e-04 
+threshold2 = 1e-03
+# For Model 1: greed, backtest in greed 
+pos1 = GP.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
+pos2 = GP.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
+GP.five_label_pos(in_file,'train_g_test_g_5_pos',pos1, pos2)
+# For Model 2: greed, backtest in neutral 
+pos1 = GP.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
+pos2 = GP.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
+GP.five_label_pos(in_file,'train_g_test_n_5_pos',pos1, pos2)
+# For Model 3: fear model, backtest in fear 
+pos1 = GP.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
+pos2 = GP.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
+GP.five_label_pos(in_file,'train_f_test_f_5_pos',pos1, pos2)
+# For Model 4: fear model, backtest in neutral 
+pos1 = GP.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
+pos2 = GP.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
+GP.five_label_pos(in_file,'train_f_test_n_5_pos',pos1, pos2)
 
 ##-----------------------------------------------backtesting----------------------------------------## 
-
-for pos_file in pos_files: 
-    backtest(pos_file)
+price_path = './Data/interval_data.csv'
+pos_paths = ['./Prediction/train_g_test_g_5_pos.csv','./Prediction/train_g_test_n_5_pos.csv',
+            './Prediction/train_f_test_f_5_pos.csv', './Prediction/train_f_test_n_5_pos.csv']
+for pos_path in pos_paths: 
+    backtesting(price_path, pos_path)
 
 ##-----------------------------------------------analysis------------------------------------------## 
 # testing different time interval selection 

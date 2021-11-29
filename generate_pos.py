@@ -56,7 +56,7 @@ class generate_pos():
                     else: 
                         df.iloc[i,1] = -pos 
             
-            df.to_csv('./Prediction/'+ in_file + '_out.csv')
+            df.to_csv('./Prediction/'+ out_file)
         return 
    
 
@@ -127,7 +127,7 @@ class generate_pos():
                     else: 
                         df.iloc[i,1] = -pos_2
             
-            df.to_csv('./Prediction/'+ in_file + '_out.csv')
+            df.to_csv('./Prediction/'+ out_file)
         return 
    
     
