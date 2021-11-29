@@ -77,8 +77,8 @@ class svm_interval:
     def generate_y(self, f2, N, label_num = 3): 
         # mid-price trend label
         y = np.zeros([N-1,], dtype = 'int')
-        threshold1 = 0.1
-        threshold2 = 2.0
+        threshold1 = 5e-04 
+        threshold2 = 1e-03
         if(label_num == 3):
             for i in range(N-1):
                 y[i] = 0 if (abs(f2[i+1, 15] - f2[i, 15]) < threshold1) else (1 if (f2[i+1, 15] > f2[i, 15]) else -1)
@@ -155,7 +155,7 @@ class svm_timepoint:
         N = f2.shape[0] - 2
         # mid-price trend label
         y = np.zeros([N,], dtype = 'int')
-        threshold = 0.1
+        threshold = 8e-04
         for i in range(N):
             y[i] = 0 if (abs(f2[i+2, 5] - f2[i+1, 5]) < threshold) else (1 if (f2[i+2, 5] > f2[i+1, 5]) else -1)
         return y 
