@@ -27,11 +27,16 @@ print(os.chdir('..'))
 
 ##---------------------------------Train Models without condition-------------------------------------##
 mb = model_builder(pcs, interval, path)
-pred_y_list = mb.build_model()
+tt_result = mb.build_model()
+score_list = tt_result[:4]
+report_list = tt_result[4:]
 
 ##-----------------------------------SVM Interval with PCA with condition ----------------------------## 
 cmb = conditional_model_builder(pcs, interval, path)
-conditional_pred_y_list = cmb.build_model()
+tt_result = cmb.build_model()
+pred_y_list = tt_result[:4]
+conditional_score_list = tt_result[4:8]
+conditional_report_list = tt_result[8:]
 
 ##---------------------------------------from prediction to position--------------------------------## 
 GP = gp()

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
+from sklearn.metrics import balanced_accuracy_score
 from sklearn import svm
 import pickle
 from interval_split import split, normalize
@@ -183,11 +185,17 @@ class train_test:
         except Exception as e:
             print(e)
         
-    def pred(self, model, X_test, y_test):
+    def pred(self, model, X_test, y_test, class_num = 3, backtest = False):
         pred = model.predict(X_test)
-        ap = model.score(X_test, y_test)
-        print(ap)
-        return pred 
+        score = balanced_accuracy_score(y_test, pred)
+        if(class_num == 3):
+            clf_report = classification_report(y_test, pred, labels = [-1, 0, 1], output_dict = backtest)
+        elif(class_num == 5):
+            clf_report = classification_report(y_test, pred, labels = [-2, -1, 0, 1, 2], output_dict = backtest)
+        if(backtest):    
+            return [pred, score, clf_report] 
+        else:
+            return [score, clf_report]
 
     def attach_timestamp(self, pred_y, timestamp):
         temp1 = pred_y.reshape(-1,1)
