@@ -3,6 +3,7 @@ import backtrader as bt
 import backtrader.feeds as btfeeds
 import analysis as analysis
 import pyfolio as pf
+from datetime import datetime
 
 class backtest():
     def __init__(self) -> None:

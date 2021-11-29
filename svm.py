@@ -81,10 +81,10 @@ class svm_interval:
         threshold2 = 1e-03
         if(label_num == 3):
             for i in range(N-1):
-                y[i] = 0 if (abs(f2[i+1, 15] - f2[i, 15]) < threshold1) else (1 if (f2[i+1, 15] > f2[i, 15]) else -1)
+                y[i] = 0 if (abs((f2[i+1, 15] - f2[i, 15])/f2[i, 15]) < threshold1) else (1 if (f2[i+1, 15] > f2[i, 15]) else -1)
         elif(label_num == 5):
             for i in range(N-1):
-                difference = f2[i+1, 15] - f2[i, 15]
+                difference = (f2[i+1, 15] - f2[i, 15])/f2[i, 15]
                 if(abs(difference) < threshold1):
                     y[i] = 0
                 elif(abs(difference) < threshold2):
