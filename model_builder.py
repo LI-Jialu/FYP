@@ -28,9 +28,7 @@ class model_builder:
         f1, f2, f3, f4, f5, f6 = svm_s.timpoint_feature()
         X_test = svm_s.generate_X(f1, f2, f3, f4, f5, f6)
         y_test = svm_s.generate_y(f2)
-        pred_y_1 = tt.pred(svm_model_1, X_test, y_test)
-        timestamp_array = svm_s.get_timestamp_array()[1:-1]
-        pred_y_1 = tt.attach_timestamp(pred_y_1, timestamp_array)
+        score_1, report_1 = tt.pred(svm_model_1, X_test, y_test)
         tt.dump(svm_model_1)
         endtime_point = datetime.datetime.now()
         print('The SVM using one-timestamp datapoint running time:')
@@ -48,9 +46,7 @@ class model_builder:
         f1_2, f2_2, f3_2, f4_2, f5_2, f6_2, f7_2, f8_2 = svm_i_2.interval_feature()
         X_test = svm_i_2.generate_X(f1_2, f2_2, f3_2, f4_2, f5_2, f6_2, f7_2, f8_2)
         y_test = svm_i_2.generate_y(f2_2, f2_2.shape[0], 3)
-        pred_y_2 = tt.pred(svm_model_2, X_test, y_test)
-        timestamp_array = svm_i_2.get_timestamp_array()[:-1]
-        pred_y_2 = tt.attach_timestamp(pred_y_2, timestamp_array)
+        score_2, report_2 = tt.pred(svm_model_2, X_test, y_test)
         tt.dump(svm_model_2)
         endtime_interval = datetime.datetime.now()
         print('The SVM using sliding window (3 labels) running time:')
@@ -61,8 +57,7 @@ class model_builder:
         y_train = svm_i_1.generate_y(f2_1, f2_1.shape[0], 5)
         y_test = svm_i_2.generate_y(f2_2, f2_2.shape[0], 5)
         svm_model_3 = tt.train(X_train, y_train)
-        pred_y_3 = tt.pred(svm_model_3, X_test, y_test)
-        pred_y_3 = tt.attach_timestamp(pred_y_3, timestamp_array)
+        score_3, report_3 = tt.pred(svm_model_3, X_test, y_test, 5)
         tt.dump(svm_model_3)
         endtime_interval = datetime.datetime.now()
         print('The SVM using sliding window (5 labels) running time:')
@@ -77,14 +72,14 @@ class model_builder:
         pca.fit(X_test)
         X_test = pca.transform(X_test)
         svm_model_4 = tt.train(X_train, y_train)
-        pred_y_4 = tt.pred(svm_model_4, X_test, y_test)
-        pred_y_4 = tt.attach_timestamp(pred_y_4, timestamp_array)
+        score_4, report_4 = tt.pred(svm_model_4, X_test, y_test, 5)
         tt.dump(svm_model_4)
         endtime_interval = datetime.datetime.now()
         print('The SVM using sliding window (5 labels) and PCA running time:')
         print((endtime_interval - starttime_interval).seconds)
         
-        return [pred_y_1, pred_y_2, pred_y_3, pred_y_4]
+        return [score_1, score_2, score_3, score_4,
+                report_1, report_2, report_3, report_4]
         
 class conditional_model_builder:
     def __init__(self, pcs, interval, path):
@@ -98,8 +93,8 @@ class conditional_model_builder:
         pcs = self.pcs
         interval = self.interval
         date_list = ['2021-09-29', '2021-09-30', '2021-09-31', 
-             '2021-10-02', '2021-10-04', '2021-10-06', 
-             '2021-10-28', '2021-10-05', '2021-10-03', ]
+                     '2021-10-02', '2021-10-04', '2021-10-06', 
+                     '2021-10-28', '2021-10-05', '2021-10-03', ]
         df = [DOB.load_data(self.path, date_list[i]) for i in range(9)]
         
         X_train_greed = np.zeros((1,pcs), dtype = 'float64')
@@ -163,10 +158,10 @@ class conditional_model_builder:
         svm_model_greed = tt.trian(X_train_greed, y_train_greed)
         svm_model_fear = tt.train(X_train_fear, y_train_fear)
         
-        pred_y_greed = tt.train(svm_model_greed, X_test_greed, y_test_greed)
-        pred_y_fear = tt.train(svm_model_fear, X_test_fear, y_test_fear)
-        pred_y_neutral_fear = tt.train(svm_model_fear, X_test_neutral, y_test_neutral)
-        pred_y_neutral_greed = tt.train(svm_model_greed, X_test_neutral, y_test_neutral)
+        pred_y_greed, score_g, report_g = tt.pred(svm_model_greed, X_test_greed, y_test_greed, 5, True)
+        pred_y_fear, score_f, report_f = tt.pred(svm_model_fear, X_test_fear, y_test_fear, 5, True)
+        pred_y_neutral_fear, score_nf, report_nf = tt.pred(svm_model_fear, X_test_neutral, y_test_neutral, 5, True)
+        pred_y_neutral_greed, score_ng, report_ng = tt.pred(svm_model_greed, X_test_neutral, y_test_neutral, 5, True)
         pred_y_greed = tt.attach_timestamp(pred_y_greed, timestamp_greed)
         pred_y_fear = tt.attach_timestamp(pred_y_fear, timestamp_fear)
         pred_y_neutral_fear = tt.attach_timestamp(pred_y_neutral_fear, timestamp_neutral)
@@ -176,4 +171,6 @@ class conditional_model_builder:
         print('The SVM using sliding window and PCA and Condition (Greed or Fear) running time:')
         print((endtime_interval - starttime_interval).seconds)
         
-        return [pred_y_fear, pred_y_greed, pred_y_neutral_fear, pred_y_neutral_greed]
+        return [pred_y_fear, pred_y_greed, pred_y_neutral_fear, pred_y_neutral_greed,
+                score_f, score_g, score_nf, score_ng,
+                report_f, report_g, report_nf, report_ng]
