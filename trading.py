@@ -1,22 +1,32 @@
 import backtrader as bt
 import datetime
 
+
 class CommisionScheme(bt.CommInfoBase):
     params = (
-    ('stocklike', False),  # Futures
-    ('commtype', bt.CommInfoBase.COMM_PERC),  # Apply % Commission
-    ('percabs', True),  # pass perc as 0.xx
+        ('stocklike', False),  # Futures
+        ('commtype', bt.CommInfoBase.COMM_PERC),  # Apply % Commission
+        ('percabs', True)  # pass perc as 0.xx
     )
 
     def _getcommission(self, size, price, pseudoexec):
-        return abs(size) * self.p.commission
+        return abs(size) * price * (self.p.commission)
 
-class TestStrategy(bt.Strategy):
-    params = (("threshold", 0.025))
 
+
+class Strategy(bt.Strategy):
+
+    def __init__(self):
+        d = self.datas[0]
+        d.target = list(d.target)[0]
+        d.target = {
+            datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").replace(microsecond=0): allocation
+            for date, allocation in d.target.items()
+        }
+    
     def log(self, txt, dt=None):
         """ Logging function fot this strategy"""
-        dt = dt or self.data.datetime[0]
+        dt = dt or self.data.datetime
         if isinstance(dt, float):
             dt = bt.num2date(dt)
         print("%s, %s" % (dt.date(), txt))
@@ -56,17 +66,10 @@ class TestStrategy(bt.Strategy):
             self.log(
                 "{} Closed: PnL Gross {}, Net {},".format(
                     trade.data._name,
-                    round(trade.pnl, 2),
-                    round(trade.pnlcomm, 1),
+                    round(trade.pnl, 4),
+                    round(trade.pnlcomm, 3),
                 )
             )
-
-    def __init__(self):
-        for d in self.datas:
-            d.target = {
-                datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").date(): allocation
-                for date, allocation in d.target.items()
-            }
 
    
 
@@ -74,18 +77,23 @@ class TestStrategy(bt.Strategy):
         date = self.data.datetime.datetime()
         total_value = self.broker.get_value()
 
-        for d in self.datas:
-            if date not in d.target:
-                continue
+        d = self.datas[0]
+        if date not in d.target:
+            pass
+        else:
+            target_allocation = d.target.get(date)
+
+            if target_allocation == 0:
+                pass
             else:
-                target_allocation = d.target[date]
-                trade_units = (target_allocation * total_value / d.close[0])
+                cur_pos_size = self.getposition(d).size 
+                print(target_allocation)
+                trade_units = target_allocation  / d.close[0] - cur_pos_size
+
                 if trade_units < 0:
-                    self.sell(d, size=abs(trade_units))
+                    self.sell(d, size=abs(trade_units)) 
 
                 elif trade_units > 0:
                     self.buy(d, size=abs(trade_units))
 
-                else:
-                    self.close(d)
-                    # if hit the stop loss line for several times, then st
+        print(total_value)

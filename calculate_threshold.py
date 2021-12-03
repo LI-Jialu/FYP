@@ -10,8 +10,8 @@ interval = 1000
 # load data 
 DOB = dob()
 print(os.getcwd())
-path = './Data/Order_book'
-df = DOB.load_data(path, '2021-09-30').iloc[:,:5]
+path = 'C:/Users/Jialu/Documents/Code/FYP/Data/Order_book'
+df = DOB.load_data(path, '2021-09-30').iloc[:,:10]
 rem = df.shape[0] % interval
 window_num = (df.shape[0]-rem)/interval 
 df = df.drop(df.tail(rem).index)
@@ -23,8 +23,14 @@ splited_df = pd.DataFrame()
 for s in splited_array:
     splited_df = pd.concat([splited_df, s],axis = 1)
 splited_df = splited_df.T
-to_csv_data = splited_df.iloc[:,[0,1,3]]
-to_csv_data.to_csv('./Data/interval_data.csv')
+to_csv_data = splited_df.iloc[:,[0,1,3,5,7,2]]
+to_csv_data.to_csv('C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv')
+df = pd.read_csv('C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv',usecols=['timestamp','Pa1','Pb1','Pa2','Pb2','Va1'],index_col='timestamp')
+df.index = pd.to_datetime(df.index)
+df.index = [x.replace(microsecond=0) for x in df.index]
+
+#pd['timestamp'] = [x.replace(microsecond=0) for x in pd['timestamp']]
+df.to_csv('C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv')
 # each interval's pct change 
 ret = splited_df.iloc[:,1:].pct_change().dropna()
 
