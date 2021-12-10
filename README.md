@@ -15,7 +15,8 @@
 2. Data preprocessing 
     * Split data into windows: `interval_split.py`
 3. Model 
-    * `model_builder.py`
+    * Select features, labels and construct original SVM model: `svm.py`
+    * Build self-designed model from original SVM model: `model_builder.py`
 4. Backtesting 
     * From prediction results to investment positions: `generate_pos.py`
     * Take actions of positions: `trading.py`
