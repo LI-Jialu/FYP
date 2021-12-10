@@ -45,7 +45,7 @@ plt.title('Price change of asks and bids in an interval',fontsize=14)
 plt.legend(fontsize=10)
 fig = plt.gcf()
 fig.set_size_inches(7.2, 4.2)
-fig.savefig('./Price_change.png', dpi=100)
+fig.savefig('./Images/Price_change.png', dpi=100)
 
 
 '''plt.hist(x2, color='green',label='ask', **kwags)
