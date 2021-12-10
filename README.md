@@ -7,11 +7,6 @@
 * SVM + Sliding window + PCA
 * SVM + Sliding window + PCA + Condition 
 
-## Branches 
-* Main 
-* CPU_Version 
-* GPU_Version 
-
 ## File Structure 
 1. Collect Data 
     * Collect orderbook data: `dowload_order_book.py`
