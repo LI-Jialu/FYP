@@ -20,14 +20,8 @@ class model_builder:
         starttime_point = datetime.datetime.now()
         svm_s = svm_timepoint(df_train) # use the data of 2021-10-02 to train
         f1, f2, f3, f4, f5, f6 = svm_s.timpoint_feature()
-        
-        np.savetxt('f1.txt', f1, fmt='%d')
-
-        print(f1)
         X_train = svm_s.generate_X(f1, f2, f3, f4, f5, f6)
         y_train = svm_s.generate_y(f2)
-        np.savetxt('y_train.txt', y_train, fmt='%d')
-        
         svm_model_1 = tt.trian(X_train, y_train)
         
         svm_s = svm_timepoint(df_test) # use the data of 2021-10-04 to test

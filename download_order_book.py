@@ -9,12 +9,9 @@ class download_order_book:
     def __init__(self):
         pass
 
-    # function used by default if not provided via options
     def default_file_name(exchange, data_type, date, symbol, format):
         return f"{exchange}_{data_type}_{date.strftime('%Y-%m-%d')}_{symbol}.{format}.gz"
 
-
-    # customized get filename function - saves data in nested directory structure
     def file_name_nested(exchange, data_type, date, symbol, format):
         return f"{exchange}/{data_type}/{date.strftime('%Y-%m-%d')}_{symbol}.{format}.gz"
 
@@ -22,26 +19,18 @@ class download_order_book:
         os.chdir('.\Data')
         logging.basicConfig(level=logging.DEBUG)
         datasets.download(
-            # one of https://api.tardis.dev/v1/exchanges with supportsDatasets:true - use 'id' value
             exchange="binance-futures",
-            # accepted data types - 'datasets.symbols[].dataTypes' field in https://api.tardis.dev/v1/exchanges/deribit,
-            # or get those values from 'deribit_details["datasets"]["symbols][]["dataTypes"] dict above
-            # Allowed  'dataType' param values: 
+            # 'dataType' param values: 
             # 'trades', 'incremental_book_L2', 'quotes', 'derivative_ticker', 'options_chain', 'book_snapshot_5', 'book_snapshot_25', 'liquidations'.
             data_types=['book_snapshot_5'],
             # filters=[Channel(name="depth", symbols=["btcusdt"])],
             from_date="2021-07-30",
             # to date is non inclusive
             to_date="2021-11-30",
-            # accepted values: 'datasets.symbols[].id' field in https://api.tardis.dev/v1/exchanges/deribit
             symbols=["BTCUSDT"],
-            # (optional) your API key to get access to non sample data as well
             api_key="TD.P1RQy3kV6rkCX-Js.8wpD7WjlIBu6l5O.wujparLjM0uHh5P.haoaBrqe-I8WegV.9mLshEQh6GT1INZ.8qOm",
-            # (optional) path where data will be downloaded into, default dir is './datasets'
             download_dir="./Order_book",
-            # (optional) - one can customize downloaded file name/path (flat dir strucure, or nested etc) - by default function 'default_file_name' is used
             # get_filename=default_file_name,
-            # (optional) file_name_nested will download data to nested directory structure (split by exchange and data type)
             # get_filename=file_name_nested,
             
         )

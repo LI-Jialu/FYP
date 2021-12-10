@@ -109,7 +109,7 @@ class svm_timepoint:
                     'Vb1', 'Vb2', 'Vb3', 'Vb4', 'Vb5', ]]
         f1 = np.array(f1)
 
-        # Feature Set V2
+        # Feature Set V2: Price Difference + Mid-price 
         temp1 = f1[:, 0:5] - f1[:, 10:15]
         temp2 = (f1[:, 0:5] + f1[:, 10:15]) * 0.5
         f2 = np.concatenate((temp1, temp2), axis = 1)

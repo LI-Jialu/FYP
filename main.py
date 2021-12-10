@@ -21,35 +21,33 @@ pcs = 5 # 2, 10, the number of targeted principal componenets
 starttime_0 = dt.now()
 ##-------------------------------------------Data collection-----------------------------------------## 
 DOB = dob()
-'''
-# DOB.download_derivative_ticker() 
 DOB.download_order_book() 
 # Fear and Greedy index 
-# fng = np.array(pd.read_csv('./Data/fng_index.csv', header = 0)['fng_value'])
+fng = np.array(pd.read_csv('./Data/fng_index.csv', header = 0)['fng_value'])
 
 ##---------------------------------Data loading & preprocessing--------------------------------------## 
-# pd.set_option('display.max_columns', None)
+pd.set_option('display.max_columns', None)
 # path = 'C:/tardis_dataset/bitmex'
 path = './Data/Order_book'
 print(os.chdir('..'))
 
-
 ##---------------------------------Train Models without condition-------------------------------------##
-mb = model_builder(pcs, interval, path)
+mb = model_builder(pcs, interval, './Data/Order_book')
 tt_result = mb.build_model()
 score_list = tt_result[:4]
 report_list = tt_result[4:]
+
 
 ##-----------------------------------SVM Interval with PCA with condition ----------------------------## 
 cmb = conditional_model_builder(pcs, interval, path)
 tt_result = cmb.build_model()
 pred_y_list = tt_result[:4]
 conditional_score_list = tt_result[4:8]
-conditional_report_list = tt_result[8:]'''
+conditional_report_list = tt_result[8:]
 
 ##---------------------------------------from prediction to position--------------------------------## 
 # pred = pd.DataFrame(gp.load_model(file = 'C:/Users/Jialu/Documents/Code/FYP/metrics/pred_y_list')[0]).to_csv('C:/Users/Jialu/Documents/Code/FYP/metrics/pred_y_list.csv')
-'''pred = gp.load_model(file = 'C:/Users/Jialu/Documents/Code/FYP/metrics/pred_y_list')
+pred = gp.load_model(file = 'C:/Users/Jialu/Documents/Code/FYP/metrics/pred_y_list')
 threshold1 = 5e-04 
 threshold2 = 1e-03
 pre_acc_1, pre_acc_m1 = 0.8, 0.8
@@ -57,13 +55,15 @@ pre_acc_2, pre_acc_m2 = 0.9, 0.9
 # For Model 1: greed, backtest in greed 
 pos1 =gp.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
 pos2 =gp.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
-'''
-'''df = pd.read_csv('C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv',index_col=0)
+
+df = pd.read_csv('C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv',index_col=0)
 df['prediction'] = np.random.choice([-1,0,1], size = len(df), p=[0.3,0.4, 0.3])
 df.to_csv('C:/Users/Jialu/Documents/Code/FYP/Prediction/train_g_test_g_5.csv')
-gp.five_label_pos('train_g_test_g_5','train_g_test_g_5_pos',cash*0.05, cash*0.1)'''
-'''
+gp.five_label_pos('train_g_test_g_5','train_g_test_g_5_pos',cash*0.05, cash*0.1)
+
 # For Model 2: greed, backtest in neutral 
+# Further trained in GPU version code 
+'''
 pos1 =gp.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
 pos2 =gp.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
 gp.five_label_pos(in_file,'train_g_test_n_5_pos',pos1, pos2)
@@ -74,16 +74,19 @@ gp.five_label_pos(in_file,'train_f_test_f_5_pos',pos1, pos2)
 # For Model 4: fear model, backtest in neutral 
 pos1 =gp.kelly_criteria(pre_acc_1, pre_acc_m1, threshold1, -threshold1)
 pos2 =gp.kelly_criteria(pre_acc_2, pre_acc_m2, threshold2, -threshold2)
-gp.five_label_pos(in_file,'train_f_test_n_5_pos',pos1, pos2)'''
+gp.five_label_pos(in_file,'train_f_test_n_5_pos',pos1, pos2)
+'''
 
 ##-----------------------------------------------backtesting----------------------------------------## 
-price_path = 'C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv'
+'''
 pos_paths = ['./Prediction/train_g_test_g_5_pos.csv','./Prediction/train_g_test_n_5_pos.csv',
             './Prediction/train_f_test_f_5_pos.csv', './Prediction/train_f_test_n_5_pos.csv']
-'''for pos_path in pos_paths: 
-    backtest.backtesting(price_path, pos_path)'''
-# Initialize cerebro 
+for pos_path in pos_paths: 
+    backtest.backtesting(price_path, pos_path)
+'''
 
+price_path = 'C:/Users/Jialu/Documents/Code/FYP/Data/interval_data.csv'
+pos_path = 'C:/Users/Jialu/Documents/Code/FYP/Prediction/train_g_test_g_5_pos.csv'
 cerebro = bt.Cerebro( preload=False)
 cerebro.broker.setcash(cash)
 cerebro.broker.addcommissioninfo(CommisionScheme(commission=0.0004,automargin = 1))
@@ -96,7 +99,7 @@ bt_data = btfeeds.GenericCSVData(dataname=price_path,
         dtformat=('%Y-%m-%d %H:%M:%S'),
         datetime=0,
         openinterest = -1)
-target = pd.read_csv('C:/Users/Jialu/Documents/Code/FYP/Prediction/train_g_test_g_5_pos.csv', usecols=['timestamp','cur_pos'])
+target = pd.read_csv(pos_path, usecols=['timestamp','cur_pos'])
 target.index = target['timestamp']
 target.index = [str(x) for x in target.index]
 target = target.to_dict().values()
@@ -131,12 +134,10 @@ figure = cerebro.plot(style='candlebars')[0][0]
 figure.savefig(f'backtrader.png')# View Pyfolio results
 
 ##-----------------------------------------------analysis------------------------------------------## 
+# prediction report generated by SKlearn 
 # testing different time interval selection 
 # testing different PCA dimension 
-# plot accuracy plot comparison 
-# plot the prediction on the stock graph 
-# Can this model also work for ETH? 
-# View Pyfolio results
+# view Pyfolio results
 
 ##-------------------------------------------------End---------------------------------------------## 
 endtime_0 = dt.now()
